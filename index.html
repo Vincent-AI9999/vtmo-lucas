@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>VTMO Studio – Ôn Luyện & Tăng Tốc Toán Lucas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="top-bar">
+    <div class="brand" onclick="VTMOApp.renderHome()">
+      <div class="brand-icon">🏆</div>
+      <div>
+        <div class="brand-title">VTMO Studio • Lucas</div>
+        <div class="brand-sub">Phân tích đề &amp; Luyện tốc độ (Lớp 3–4)</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="top-actions">
+      <div class="timer-pill" id="top-timer" style="display:none">⏱ 00:00</div>
+      <button class="top-pill" onclick="VTMOApp.openAnalytics()">📊 Nhật ký &amp; Đánh giá</button>
+    </div>
+  </header>
+
+  <!-- ==================== 1. HOME SCREEN ==================== -->
+  <main id="screen-home" class="screen active">
+    <div class="container">
+      <section class="hero-card">
+        <div class="hero-avatar">🚀</div>
+        <div class="hero-text">
+          <h1>Chào Lucas! Luyện Phân Tích &amp; Tăng Tốc VTMO</h1>
+          <p>Đầy đủ <b>129 bài tập đã kiểm chứng</b> + 26 ví dụ mẫu từ 3 buổi học. Tự động chấm điểm, đo tốc độ từng câu và <b>ghi nhận đánh giá mỗi lần học</b> trên Máy tính &amp; iPad.</p>
+        </div>
+        <div class="hero-cta-group">
+          <button class="btn btn-primary" onclick="VTMOApp.startMockExam(20)">🏆 Thi Thử VTMO</button>
+          <button class="btn btn-warning" onclick="VTMOApp.startSpeedSprint()">⚡ Tăng Tốc 10 Câu</button>
+        </div>
+      </section>
+
+      <div id="home-last-session"></div>
+
+      <!-- Stats Strip -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-val" id="stat-sessions">0 buổi</span>
+          <span class="stat-lbl">Số buổi học đã ghi nhận</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-done">0/129</span>
+          <span class="stat-lbl">Số câu đã chinh phục</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-acc" style="color:var(--success)">0%</span>
+          <span class="stat-lbl">Tỉ lệ làm đúng</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="stat-speed">—</span>
+          <span class="stat-lbl">Tốc độ trung bình</span>
+        </div>
+      </section>
+
+      <!-- Training Modes -->
+      <h2 class="section-heading">🎯 Chế độ rèn luyện cải thiện tốc độ</h2>
+      <section class="modes-grid">
+        <div class="mode-card" onclick="VTMOApp.openMang('mang1')">
+          <div class="mode-icon">🧩</div>
+          <div class="mode-title">Phân Tích Từng Bước</div>
+          <div class="mode-desc">Dùng nút Soi Từ Khóa, Nhận diện dạng &amp; Mở từng bước gợi ý để hết bị "đứng hình".</div>
+          <div class="mode-tag">Chọn mảng bên dưới →</div>
+        </div>
+        <div class="mode-card sprint" onclick="VTMOApp.startSpeedSprint()">
+          <div class="mode-icon">⚡</div>
+          <div class="mode-title">Tăng Tốc (Speed Sprint)</div>
+          <div class="mode-desc">10 câu chọn lọc bấm giờ từng câu, tập thói quen đọc nhanh và tính gọn trong 45–90s.</div>
+          <div class="mode-tag">Bắt đầu ngay →</div>
+        </div>
+        <div class="mode-card exam" onclick="VTMOApp.startMockExam(20)">
+          <div class="mode-icon">🏆</div>
+          <div class="mode-title">Thi Thử Tổng Hợp</div>
+          <div class="mode-desc">20 câu trộn đủ 3 mảng trong 30 phút, khóa gợi ý để kiểm tra năng lực thực chiến.</div>
+          <div class="mode-tag">Thi 20 câu / 30 phút →</div>
+        </div>
+        <div class="mode-card weak" onclick="VTMOApp.startWeakDrill()">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-title">Ôn Câu Sai &amp; Làm Chậm</div>
+          <div class="mode-desc">Tự động gom những câu Lucas từng làm sai hoặc vượt quá thời gian chuẩn để luyện lại.</div>
+          <div class="mode-tag" id="weak-mode-count">Chưa có câu sai/chậm</div>
+        </div>
+      </section>
+
+      <!-- 3 Sessions / Modules -->
+      <h2 class="section-heading">📚 Tài liệu 3 buổi học VTMO</h2>
+      <section class="mang-grid" id="mang-grid"></section>
+    </div>
+  </main>
+
+  <!-- ==================== 2. TOPIC SCREEN ==================== -->
+  <main id="screen-topic" class="screen">
+    <div class="container">
+      <button class="back-btn" onclick="VTMOApp.renderHome()">← Về trang chủ</button>
+      <div class="topic-banner" id="topic-banner"></div>
+      <div class="subtopic-list" id="subtopic-list"></div>
+    </div>
+  </main>
+
+  <!-- ==================== 3. THEORY SCREEN ==================== -->
+  <main id="screen-theory" class="screen">
+    <div class="container">
+      <button class="back-btn" id="theory-back-btn">← Quay lại mảng</button>
+      <div class="theory-tabs" id="theory-tabs"></div>
+      <div id="theory-body"></div>
+    </div>
+  </main>
+
+  <!-- ==================== 4. QUIZ & SCRATCHPAD WORKSPACE ==================== -->
+  <main id="screen-quiz" class="screen">
+    <div class="quiz-workspace-container">
+      <div class="quiz-topbar">
+        <button class="back-btn" style="margin-bottom:0" onclick="VTMOApp.exitQuiz()">← Lưu / Thoát</button>
+        <span class="quiz-mode-badge" id="quiz-mode-badge"></span>
+        <div class="quiz-progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="progress-text">
+            <span id="quiz-progress-label">Câu 1 / 10</span>
+            <span id="quiz-subtopic-label"></span>
+          </div>
+        </div>
+        <button class="btn btn-outline" id="btn-toggle-scratch" onclick="VTMOApp.toggleScratchPanel()" style="min-height:40px; padding:7px 14px; font-size:13px;">
+          ✏️ Ẩn bảng nháp
+        </button>
+      </div>
+
+      <div class="q-nav-strip" id="q-nav-strip" style="display:none"></div>
+
+      <div class="workspace-grid" id="workspace-grid">
+        <!-- LEFT: QUESTION & ANALYZER -->
+        <section class="question-card">
+          <div class="q-meta-row">
+            <div class="q-badges">
+              <span class="q-badge-num" id="q-badge-num">Câu 1</span>
+              <span class="q-badge-src" id="q-badge-src"></span>
+            </div>
+            <div class="pace-meter" id="pace-meter">⏳ 0s / Mục tiêu 60s</div>
+          </div>
+
+          <div class="nudge-banner" id="nudge-banner"></div>
+
+          <!-- Analyzer Toolbar -->
+          <div class="analyzer-bar" id="analyzer-bar">
+            <button class="tool-chip" id="btn-kw" onclick="VTMOApp.toggleKeywords()">🔍 Soi từ khóa</button>
+            <button class="tool-chip" id="btn-strategy" onclick="VTMOApp.toggleStrategy()">🧠 Nhận diện dạng &amp; Mẹo</button>
+            <button class="tool-chip" id="btn-step" onclick="VTMOApp.unlockNextStep()">🪜 Gợi ý Bước 1</button>
+          </div>
+
+          <div class="analysis-drawer" id="analysis-drawer"></div>
+
+          <div class="q-text" id="q-text"></div>
+          <div class="diagram-box" id="diagram-box" style="display:none"></div>
+
+          <div class="options-list" id="options-list"></div>
+          <div class="open-inputs-wrap" id="open-inputs-wrap" style="display:none"></div>
+
+          <div class="explanation-box" id="explanation-box">
+            <h4 id="exp-title"></h4>
+            <div class="exp-body" id="exp-body"></div>
+          </div>
+
+          <div class="action-footer">
+            <button class="btn btn-outline" id="btn-flag" onclick="VTMOApp.toggleFlag()" style="display:none">🚩 Xem lại sau</button>
+            <button class="btn btn-outline" id="btn-skip" onclick="VTMOApp.skipCurrent()">⏭ Bỏ qua</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" id="btn-submit" onclick="VTMOApp.submitCurrent()">Nộp đáp án ✓</button>
+            <button class="btn btn-success" id="btn-next" onclick="VTMOApp.nextQuestion()" style="display:none">Câu tiếp →</button>
+            <button class="btn btn-warning" id="btn-finish-exam" onclick="VTMOApp.finishExam()" style="display:none">🏁 Nộp bài thi</button>
+          </div>
+        </section>
+
+        <!-- RIGHT: IPAD PENCIL / MOUSE SCRATCHPAD & CHEATSHEET -->
+        <aside class="scratch-panel" id="scratch-panel">
+          <div class="scratch-tabs">
+            <button class="scratch-tab active" data-tab="draw" onclick="VTMOApp.switchScratchTab('draw')">✏️ Bảng viết nháp</button>
+            <button class="scratch-tab" data-tab="notes" onclick="VTMOApp.switchScratchTab('notes')">📝 Ghi chú nhanh</button>
+            <button class="scratch-tab" data-tab="cheat" onclick="VTMOApp.switchScratchTab('cheat')">📐 Mẹo nhớ nhanh</button>
+          </div>
+
+          <!-- Tab 1: Canvas -->
+          <div id="scratch-draw-pane">
+            <div class="scratch-toolbar">
+              <button class="pen-btn tool-sel active" title="Bút xanh" onclick="VTMOApp.setPen('pen', '#1d4ed8', this)"><span class="color-dot" style="background:#1d4ed8"></span></button>
+              <button class="pen-btn tool-sel" title="Bút đỏ" onclick="VTMOApp.setPen('pen', '#dc2626', this)"><span class="color-dot" style="background:#dc2626"></span></button>
+              <button class="pen-btn tool-sel" title="Bút đen" onclick="VTMOApp.setPen('pen', '#0f172a', this)"><span class="color-dot" style="background:#0f172a"></span></button>
+              <button class="pen-btn tool-sel" title="Bút dạ quang" onclick="VTMOApp.setPen('highlighter', '#facc15', this)">🖍</button>
+              <button class="pen-btn tool-sel" title="Tẩy" onclick="VTMOApp.setPen('eraser', null, this)">🧽</button>
+              <div style="flex:1"></div>
+              <button class="pen-btn" title="Đổi nền (Ô vuông / Kẻ ngang / Trắng)" onclick="VTMOApp.cyclePadBg()">▦</button>
+              <button class="pen-btn" title="Hoàn tác" onclick="VTMOApp.undoPad()">↶</button>
+              <button class="pen-btn" title="Xóa hết nháp" onclick="VTMOApp.clearPad()">🗑</button>
+            </div>
+            <div class="canvas-wrap bg-grid" id="canvas-wrap">
+              <canvas id="scratch-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Tab 2: Text Notes -->
+          <div id="scratch-notes-pane" class="scratch-notes-area">
+            <textarea id="scratch-notes-input" placeholder="Gõ nhanh các bước tính nháp hoặc tóm tắt dữ kiện ở đây... (lưu riêng cho từng câu trong phiên làm bài)"></textarea>
+          </div>
+
+          <!-- Tab 3: Formula Cheatsheet -->
+          <div id="scratch-cheat-pane" class="formula-cheatsheet">
+            <div class="cheat-block">
+              <h5>1. Dãy số cách đều</h5>
+              <div>• Số số hạng = (Cuối − Đầu) : Khoảng cách + 1</div>
+              <div>• Tổng = (Đầu + Cuối) × Số số hạng : 2</div>
+            </div>
+            <div class="cheat-block">
+              <h5>2. Dấu hiệu chia hết</h5>
+              <div>• Chia 2: tận cùng chẵn | Chia 5: tận cùng 0, 5</div>
+              <div>• Chia 3, 9: tổng chữ số chia hết 3, 9</div>
+              <div>• Chia 4: 2 chữ số cuối chia 4 | Chia 8: 3 chữ số cuối chia 8</div>
+            </div>
+            <div class="cheat-block">
+              <h5>3. Đánh số trang sách</h5>
+              <div>• Trang 1–9: 9 chữ số | Trang 1–99: 189 chữ số</div>
+            </div>
+            <div class="cheat-block">
+              <h5>4. Hình vuông kỳ diệu 3 × 3</h5>
+              <div>• Tổng 1 hàng = Tổng 9 số : 3; Ô giữa = Tổng 1 hàng : 3</div>
+            </div>
+            <div class="cheat-block">
+              <h5>5. Tính chất bất biến &amp; Ghép số</h5>
+              <div>• Đổi dấu +a thành −a: tổng giảm 2a (chẵn-lẻ KHÔNG đổi)</div>
+              <div>• Ghép a và b thành ab: tổng tăng thêm 9 × a</div>
+              <div>• Lập tất cả số 1,2,3 cs từ 3 cs ≠ 0: Tổng = 245 × S</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== 5. RESULT & SESSION EVALUATION SCREEN ==================== -->
+  <main id="screen-result" class="screen">
+    <div class="container">
+      <div class="result-card">
+        <div class="res-emoji" id="res-emoji">🏆</div>
+        <h2 id="res-title">Hoàn thành!</h2>
+        <div class="res-score" id="res-score">0 / 0</div>
+        <p id="res-time-summary" style="color:var(--text-muted); font-size:15px;"></p>
+
+        <div class="res-metrics">
+          <div class="res-metric">
+            <div class="rm-val" id="rm-correct" style="color:var(--success)">0</div>
+            <div class="rm-lbl">✅ Câu đúng</div>
+          </div>
+          <div class="res-metric">
+            <div class="rm-val" id="rm-wrong" style="color:var(--danger)">0</div>
+            <div class="rm-lbl">❌ Câu sai</div>
+          </div>
+          <div class="res-metric">
+            <div class="rm-val" id="rm-fast" style="color:var(--primary)">0</div>
+            <div class="rm-lbl">⚡ Đúng &amp; Đạt tốc độ</div>
+          </div>
+          <div class="res-metric">
+            <div class="rm-val" id="rm-skip" style="color:var(--warning)">0</div>
+            <div class="rm-lbl">⏭ Bỏ qua</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="VTMOApp.retrySession()">🔄 Làm lại bộ này</button>
+          <button class="btn btn-outline" onclick="VTMOApp.openAnalytics()">📊 Xem Nhật ký các buổi</button>
+          <button class="btn btn-outline" onclick="VTMOApp.renderHome()">🏠 Trang chủ</button>
+        </div>
+      </div>
+
+      <!-- Session Evaluation Card -->
+      <div class="eval-card" id="session-eval-card"></div>
+
+      <h2 class="section-heading">📝 Chi tiết từng câu &amp; Đánh giá tốc độ</h2>
+      <div id="review-list"></div>
+    </div>
+  </main>
+
+  <!-- ==================== 6. ANALYTICS & SESSION LOG SCREEN ==================== -->
+  <main id="screen-analytics" class="screen">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+        <button class="back-btn" style="margin-bottom:0" onclick="VTMOApp.renderHome()">← Về trang chủ</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="VTMOApp.startWeakDrill()">🎯 Luyện lại câu sai/chậm</button>
+          <button class="btn btn-outline" onclick="VTMOApp.resetStats()">🗑 Xóa thống kê</button>
+        </div>
+      </div>
+
+      <h2 class="section-heading">📊 Tổng quan theo 3 Mảng kiến thức</h2>
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Mảng kiến thức</th>
+            <th>Đã làm</th>
+            <th>Độ chính xác</th>
+            <th>Tốc độ TB</th>
+          </tr>
+        </thead>
+        <tbody id="analytics-tbody"></tbody>
+      </table>
+
+      <h2 class="section-heading">📈 Xu hướng Điểm &amp; Tốc độ các buổi gần đây</h2>
+      <div class="session-chart-box" id="session-chart-box"></div>
+
+      <h2 class="section-heading">🗓️ Nhật ký &amp; Đánh giá mỗi lần học</h2>
+      <div id="session-history-list"></div>
+
+      <h2 class="section-heading">☁️ Đồng bộ &amp; Chia sẻ dữ liệu giữa Máy tính và iPad</h2>
+      <div class="sync-panel">
+        <p style="font-size:14px; color:var(--text-muted); margin-bottom:8px;">
+          Lucas học trên iPad và Bố/Mẹ muốn gộp kết quả sang máy tính (hoặc sao lưu)? Dùng <b>Mã đồng bộ nhanh</b> hoặc <b>File JSON</b> — hệ thống sẽ gộp thông minh các buổi học mà không bị mất dữ liệu cũ.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="VTMOApp.copySyncCode()">📤 Tạo &amp; Chép mã đồng bộ</button>
+          <button class="btn btn-outline" onclick="VTMOApp.downloadBackupJson()">💾 Tải file sao lưu (.json)</button>
+          <label class="btn btn-outline" style="cursor:pointer;">
+            📂 Nạp file (.json)
+            <input type="file" accept=".json" style="display:none" onchange="VTMOApp.importBackupFile(event)" />
+          </label>
+        </div>
+        <textarea id="sync-code-input" class="sync-textarea" placeholder="Dán Mã đồng bộ nhận từ máy khác vào đây rồi bấm Nhập mã để gộp lịch sử học..."></textarea>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-success" onclick="VTMOApp.importSyncCode()">📥 Nhập mã đồng bộ</button>
+          <span id="sync-status-msg" style="font-size:13px; font-weight:700; color:var(--primary);"></span>
+        </div>
+
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer; font-size:13.5px; font-weight:800; color:var(--primary-dark);">☁️ Tùy chọn nâng cao: Tự động đồng bộ qua GitHub Gist riêng tư</summary>
+          <div class="sync-grid">
+            <div>
+              <label style="font-size:12px; font-weight:700;">Gist ID (dùng chung cho iPad &amp; PC):</label>
+              <input id="gist-id-input" class="open-input" style="width:100%; font-size:13px; min-height:38px; padding:6px 10px;" placeholder="vd: a1b2c3d4e5..." />
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:700;">GitHub Token (chỉ quyền gist, lưu trên máy này):</label>
+              <input id="gist-token-input" type="password" class="open-input" style="width:100%; font-size:13px; min-height:38px; padding:6px 10px;" placeholder="ghp_... hoặc github_pat_..." />
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn btn-outline" style="min-height:38px; padding:6px 14px; font-size:13px;" onclick="VTMOApp.saveGistConfig()">💾 Lưu cấu hình Gist</button>
+            <button class="btn btn-primary" style="min-height:38px; padding:6px 14px; font-size:13px;" onclick="VTMOApp.cloudPush()">☁️ Đẩy kết quả lên Gist</button>
+            <button class="btn btn-success" style="min-height:38px; padding:6px 14px; font-size:13px;" onclick="VTMOApp.cloudPull()">☁️ Tải &amp; Gộp từ Gist</button>
+          </div>
+        </details>
+      </div>
+
+      <h2 class="section-heading">🐢 Danh sách câu làm sai hoặc vượt thời gian mục tiêu</h2>
+      <div id="analytics-weak-list"></div>
+    </div>
+  </main>
+
+  <!-- EXIT / SAVE SESSION MODAL -->
+  <div class="modal-backdrop" id="exit-modal">
+    <div class="modal-card">
+      <h3>💾 Lưu kết quả buổi học?</h3>
+      <p id="exit-modal-msg">Lucas đã hoàn thành một số câu hỏi. Bạn có muốn ghi nhận các câu đã làm vào Nhật ký đánh giá buổi học không?</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="VTMOApp.savePartialAndFinish()">💾 Lưu buổi học &amp; Xem đánh giá</button>
+        <button class="btn btn-outline" onclick="VTMOApp.discardAndExit()">🚪 Thoát không lưu</button>
+        <button class="btn btn-outline" onclick="VTMOApp.closeExitModal()">↩️ Tiếp tục làm bài</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data/theory.js"></script>
+  <script src="data/questions_m1.js"></script>
+  <script src="data/questions_m2.js"></script>
+  <script src="data/questions_m3.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
